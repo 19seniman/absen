@@ -1,20 +1,3 @@
-def absen(update: Update, context: CallbackContext):
-    user = update.effective_user
-    if user is None:
-        update.message.reply_text("Error: Tidak dapat mengenali pengguna.")
-        return
-
-    today = get_today_date()
-    if today not in attendance:
-        attendance[today] = set()
-    if user.full_name in attendance[today]:
-        update.message.reply_text(f"Halo {user.full_name}, kamu sudah absen hari ini. Terima kasih!")
-    else:
-        attendance[today].add(user.full_name)
-        save_attendance()  # Simpan data setelah absen
-        update.message.reply_text(f"Absensi kamu dicatat, {user.full_name}. Terima kasih sudah absen!")
-
-
 import logging
 from datetime import datetime
 import os

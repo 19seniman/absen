@@ -1,12 +1,13 @@
 import logging
 from datetime import datetime
 import os
-from dotenv import load_dotenv  # Import library dotenv
+import json
 from telegram import Update, BotCommand
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
-# Memuat variabel lingkungan dari file .env
-load_dotenv()
+# Jika menggunakan file .env, uncomment baris berikut:
+# from dotenv import load_dotenv
+# load_dotenv()
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -15,6 +16,30 @@ logger = logging.getLogger(__name__)
 
 # Penyimpanan absensi: {tanggal: set nama pengguna}
 attendance = {}
+
+def load_attendance():
+    global attendance
+    try:
+        with open('attendance.json', 'r') as f:
+            data = json.load(f)
+        # Mengubah list menjadi set untuk keperluan penyimpanan di memori
+        attendance = {date: set(names) for date, names in data.items()}
+        logger.info("Data absensi berhasil dimuat dari file.")
+    except FileNotFoundError:
+        attendance = {}
+        logger.info("File absensi tidak ditemukan, membuat data baru.")
+    except json.JSONDecodeError:
+        attendance = {}
+        logger.warning("File absensi rusak atau kosong, membuat data baru.")
+
+def save_attendance():
+    try:
+        with open('attendance.json', 'w') as f:
+            # Konversi set ke list agar bisa disimpan ke JSON
+            json.dump({date: list(names) for date, names in attendance.items()}, f, indent=4)
+        logger.info("Data absensi berhasil disimpan ke file.")
+    except Exception as e:
+        logger.error(f"Gagal menyimpan data absensi: {e}")
 
 def get_today_date():
     return datetime.now().strftime("%Y-%m-%d")
@@ -32,6 +57,7 @@ def absen(update: Update, context: CallbackContext):
         update.message.reply_text(f"Halo {user.full_name}, kamu sudah absen hari ini. Terima kasih!")
     else:
         attendance[today].add(user.full_name)
+        save_attendance()
         update.message.reply_text(f"Absensi kamu dicatat, {user.full_name}. Terima kasih sudah absen!")
 
 def absen_list(update: Update, context: CallbackContext):
@@ -55,6 +81,8 @@ def main():
         logger.error("Token bot tidak ditemukan! Harap atur variabel lingkungan BOT_TOKEN.")
         return
 
+    load_attendance()
+
     updater = Updater(token, use_context=True)
     dp = updater.dispatcher
 
@@ -74,3 +102,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -4,17 +4,16 @@ import os
 import json
 from telegram import Update, BotCommand
 from telegram.ext import Updater, CommandHandler, CallbackContext
+from dotenv import load_dotenv
 
-# Jika menggunakan file .env, uncomment baris berikut:
-# from dotenv import load_dotenv
-# load_dotenv()
+# Memuat variabel lingkungan dari file .env
+load_dotenv()
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Penyimpanan absensi: {tanggal: set nama pengguna}
 attendance = {}
 
 def load_attendance():
@@ -22,7 +21,6 @@ def load_attendance():
     try:
         with open('attendance.json', 'r') as f:
             data = json.load(f)
-        # Mengubah list menjadi set untuk keperluan penyimpanan di memori
         attendance = {date: set(names) for date, names in data.items()}
         logger.info("Data absensi berhasil dimuat dari file.")
     except FileNotFoundError:
@@ -35,7 +33,6 @@ def load_attendance():
 def save_attendance():
     try:
         with open('attendance.json', 'w') as f:
-            # Konversi set ke list agar bisa disimpan ke JSON
             json.dump({date: list(names) for date, names in attendance.items()}, f, indent=4)
         logger.info("Data absensi berhasil disimpan ke file.")
     except Exception as e:
@@ -78,7 +75,7 @@ def start(update: Update, context: CallbackContext):
 def main():
     token = os.getenv("BOT_TOKEN")
     if not token:
-        logger.error("Token bot tidak ditemukan! Harap atur variabel lingkungan BOT_TOKEN.")
+        logger.error("Token bot tidak ditemukan! Harap atur variabel lingkungan BOT_TOKEN dalam file .env")
         return
 
     load_attendance()

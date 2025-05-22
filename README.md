@@ -14,6 +14,8 @@ source absen/bin/activate
 ```
 ```
 nano .env
+
+simpan dengan ctrl x y enter
 ```
 next install module on script
 

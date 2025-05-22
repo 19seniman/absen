@@ -12,5 +12,13 @@ cd absen
 python3 -m venv absen
 source absen/bin/activate
 ```
+```
+nano .env
+```
+next install module on script
 
+run the bot
+```
+python3 absen.py
+```
 
